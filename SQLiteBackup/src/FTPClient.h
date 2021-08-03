@@ -24,6 +24,7 @@ class winSocket
 {
 private:
 	SOCKET ConnectSocket;
+
 public:
 	winSocket(const std::string& ip, std::string& port);
 	winSocket() = delete;
@@ -40,25 +41,29 @@ private:
 class FTPClient: private winSocket
 {
 private:
-	const std::string& user;
-	const std::string& passwd;
+	const std::string user;
+	const std::string passwd;
+	const std::string ip;
+	const std::string port;
 	winSocket* dataChannel;
+
 public:
 	FTPClient(const std::string& ip, std::string& port, const std::string& user, const std::string& passwd)
-		: winSocket(ip, port), user(user), passwd(passwd) {
-		std::string dataChannelPort = login();
-		std::cout << "Creating data channel on " + ip + ":" + dataChannelPort << std::endl;
-		dataChannel = new winSocket(ip, dataChannelPort);
+		: winSocket(ip, port), user(user), passwd(passwd), ip(ip), port(port) {
+		dataChannel = nullptr;
+		login();
 	}
+
 	FTPClient() = delete;
 	virtual ~FTPClient();
 
 	std::string executeCommand(const std::string& cmd);
+	void requestNewDataChannel();
 	std::string readData();
 	void sendData(const std::string& data);
 
 private:
-	std::string login();
+	void login();
 };
 
 #endif

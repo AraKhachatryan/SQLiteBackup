@@ -1,18 +1,15 @@
 #include <iostream>
 #include "src/SQLite.h"
 #include "src/FTPClient.h"
-#include <direct.h> // for getcwd()
+#include <regex>
 
+//#include "gtest/gtest.h"
 
-std::string GetCurrentWorkingDir() {
-    std::string cwd("\0", FILENAME_MAX + 1);
-    return _getcwd(&cwd[0], cwd.capacity());
-}
 
 int main()
 {
     SQLite* db = new SQLite("example.db");
-    int total_changes = -55;
+    int total_changes = 0;
 
     db->beginTransaction();
 
@@ -81,20 +78,28 @@ int main()
     // see FTP commands https://en.wikipedia.org/wiki/List_of_FTP_commands
     ftp->executeCommand("PWD");
 
-    // Command that recuires data channel
+    // Command that requires data channel
+    ftp->requestNewDataChannel();
     ftp->executeCommand("LIST");
-    ftp->readData(); // read from data channel
+    std::string lsResponse = ftp->readData(); // read from data channel
 
     // assumming that the user have all permissions on the ftp directory
+    // make directory in the FTP server
     std::string mkdir = "MKD " + dir;
     ftp->executeCommand(mkdir);
 
-    std::string currentDir = GetCurrentWorkingDir();
-    std::string sendFileCMD = "STOR " + currentDir + "\\" + sqlDumpFile;
-    ftp->executeCommand(sendFileCMD);
+    // Command that requires data channel
+    ftp->requestNewDataChannel();
+    ftp->executeCommand("LIST");
+    ftp->readData(); // read from data channel
 
-    // TODO
-    //ftp->sendData(sqlDumpFile);
+    // Backup the database file into FTP server
+    std::ifstream fs(sqlDumpFile);
+    std::string sqlDumpBuf((std::istreambuf_iterator<char>(fs)), std::istreambuf_iterator<char>());
+    std::string sendFileCMD = "STOR " + dir + "/" + sqlDumpFile;
+    ftp->requestNewDataChannel();
+    ftp->executeCommand(sendFileCMD);
+    ftp->sendData(sqlDumpBuf);
 
     delete db;
     delete ftp;

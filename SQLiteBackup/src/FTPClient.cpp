@@ -104,10 +104,13 @@ std::string winSocket::receive() {
 }
 
 FTPClient::~FTPClient() {
-
+    if (dataChannel != nullptr) {
+        delete dataChannel;
+        dataChannel = nullptr;
+    }
 }
 
-std::string FTPClient::login() {
+void FTPClient::login() {
     receive();  // Welcome message
 
     std::string userCMD = "USER " + user;
@@ -115,17 +118,24 @@ std::string FTPClient::login() {
 
     std::string passwdCMD = "PASS " + passwd;
     executeCommand(passwdCMD);
+}
 
-    std::string pasvResponse = executeCommand("pasv");
+void FTPClient::requestNewDataChannel() {
+    std::string pasvResponse = executeCommand("PASV");
     std::stringstream s_pasvResponse(pasvResponse);
     std::vector<std::string> split;
     while (s_pasvResponse.good()) {
         std::string substr;
-        getline(s_pasvResponse, substr, ','); //get first string delimited by comma
+        getline(s_pasvResponse, substr, ',');
         split.push_back(substr);
     }
-    std::string dataChannelPort = std::to_string(std::stoi(split[4]) * 256 + std::stoi(split[5]));
-    return dataChannelPort;
+    std::string port = std::to_string(std::stoi(split[4]) * 256 + std::stoi(split[5]));
+    if (dataChannel != nullptr) {
+        delete dataChannel;
+        dataChannel = nullptr;
+    }
+    std::cout << "Creating new data channel on " + ip + ":" + port << std::endl;
+    dataChannel = new winSocket(ip, port);
 }
 
 std::string FTPClient::executeCommand(const std::string& cmd) {
