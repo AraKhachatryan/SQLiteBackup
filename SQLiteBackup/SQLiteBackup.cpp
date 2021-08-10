@@ -3,8 +3,6 @@
 #include "src/FTPClient.h"
 #include <regex>
 
-//#include "gtest/gtest.h"
-
 
 int main()
 {
@@ -64,7 +62,6 @@ int main()
 
     std::string sqlDumpFile = "export.sql";
     db->dump(sqlDumpFile);
-    db->close();
 
     std::cout << std::endl;
 

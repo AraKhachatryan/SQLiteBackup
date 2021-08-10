@@ -40,7 +40,7 @@ void SQLite::connect(const std::string& sDbName) {
 
     if (rc != SQLITE_OK) {
         std::string errmsg(sqlite3_errmsg(m_pDb));
-        throw SQLite("Can't open database:  " + errmsg);
+        throw SQLiteException("Can't open database:  " + errmsg);
     } else {
         std::cout << "Opened " << sDbName << " database successfully" << std::endl;
     }
@@ -79,7 +79,7 @@ void SQLite::dump(const std::string& sqlFileName) {
     sqlDump.open(sqlFileName, std::ios::out);
 
     sqlDump << "PRAGMA foreign_keys=OFF;\n";
-    sqlDump << "BEGIN TRANSACTION;\n\n";
+    sqlDump << "BEGIN TRANSACTION;\n";
 
     execute("SELECT sql,tbl_name,type FROM sqlite_master WHERE type = 'table';");
     std::vector<std::vector<std::string>> tables = m_queryResult.result;
@@ -93,7 +93,7 @@ void SQLite::dump(const std::string& sqlFileName) {
             bool once = false;
             for (std::string value: row) {
                 if (once) {
-                    sqlDump << ", ";
+                    sqlDump << ",";
                 }
                 once = true;
                 if (!value.empty()) {
@@ -104,7 +104,6 @@ void SQLite::dump(const std::string& sqlFileName) {
             }
             sqlDump << ");\n";
         }
-        sqlDump << "\n";
     }
 
     execute("SELECT sql FROM sqlite_master WHERE type = 'trigger';");

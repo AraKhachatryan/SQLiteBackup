@@ -9,33 +9,33 @@
 #include "sqlite/sqlite3.h"
  
 /**
- *   Custom exception class
+ *   @brief Custom exception class
  */
 class SQLiteException: public std::exception
 {
 public:
     /**
-   *   Construct a SQLiteException with a message.
+   *   @brief Construct a SQLiteException with a message.
    *   @param message explanatory message
    */
     SQLiteException(const std::string &message) throw();
  
-    /** Destructor.
+    /** @brief Destructor.
      */
     virtual ~SQLiteException() throw ();
  
-    /** Returns a pointer to the (constant) error description.
+    /** @brief Returns a pointer to the (constant) error description.
      */
     virtual const char* what() const throw (){  return errmsg.c_str(); }
  
 protected:
-    /** Error message.
+    /** @brief Error message.
      */
     std::string errmsg;
 };
  
 /**
- *    structure for representing a query result
+ *    @brief structure for representing a query result
  */
 typedef struct queryResult {
     std::vector<std::string> columnNames;
@@ -48,7 +48,7 @@ typedef struct queryResult {
 } queryResult;
 
 /**
- *    Struct for Sync database for Multithreading
+ *    @brief Struct for Sync database for Multithreading
  */
 typedef struct sync
 {
@@ -60,17 +60,17 @@ typedef struct sync
 }syncDB;
  
 /**
- *    class for handling database connection and executing sql query
+ *    @brief class for handling database connection and executing sql query
  */
 class SQLite
 {
 private:
-    /** SQLITE  database connection object
+    /** @brief SQLITE  database connection object
     */
     sqlite3* m_pDb;
 
-     /**
-     *   Sync Database in Case of Multiple Threads using class object
+    /**
+     *   @brief Sync Database in Case of Multiple Threads using class object
      **/
     syncDB* sync;
  
@@ -79,11 +79,12 @@ private:
     static queryResult m_queryResult;
 public:
     /**
-     *   Creates a database connection
+     *   @brief Creates a database connection
      **/
     SQLite();
+
     /**
-     *   Creates database  connection to the specified database.
+     *   @brief Creates database  connection to the specified database.
      *   @param sDbName database name.
      *   @exception SQLiteException thrown if unable to connect to the database.
      **/
@@ -95,68 +96,65 @@ public:
     virtual ~SQLite();
  
     /**
-     *   To make connection to a database.
+     *   @brief To make connection to a database.
      *   @param sDbName database name.
      *   @exception SQLiteException thrown if unable to connect to the database.
      **/
     void connect(const std::string& sDbName);
+
     /**
-     *   Closes databse connection..
+     *   @brief Closes databse connection..
      *   @exception SQLiteException thrown if unable to close the connection.
      **/
     void close();
+
     /**
-     *   Executes SQL commands provided by sQuery argument
-     *   Can consist of more than one SQL command.
+     *   @brief Executes SQL commands provided by sQuery argument
+     *          Can consist of more than one SQL command.
      *   @param sQuery sql query
      *   @exception SQLiteException thrown if encounters an error while executing the query.
      **/
     int execute(const std::string& sQuery);
 
     /**
-     *   Prints the qurey result
+     *   @brief Prints the qurey result
      **/
     void printQueryResult();
 
     /**
-     *   To dump the database into SQL file
-     *   @exception SQLiteException thrown if encounters an error .
+     *   @brief To dump the database into SQL file
+     *   @param sqlFileNam file name
      **/
     void dump(const std::string& sqlFileNam);
  
      /**
-     *   To get the result set.
-     *   @exception SQLiteException thrown if encounters an error .
+     *   @brief To get the result set.
      **/
     queryResult* getQueryResult();
  
     /**
-     *   Begins an atomic transaction
-     *   @exception SQLiteException thrown if encounters an error .
+     *   @brief Begins an atomic transaction
      **/ 
     void beginTransaction();
 
     /**
-     *   Commit all atomic transaction
-     *   @exception SQLiteException thrown if encounters an error .
+     *   @brief Commit all atomic transaction
      **/
     void commitTransaction();
 
     /**
-     *   To revert all atomic transaction
-     *   @exception SQLiteException thrown if encounters an error .
+     *   @brief To revert all atomic transaction
      **/
     void rollBack();
  
 private:
     /**
-     *   To clear result array.
-     *   @exception std::exception thrown if encounters an error .
+     *   @brief To clear result array.
      **/
     void clearRecords();
+
     /**
-     *   Callback function executed when executing a select query.
-     *   @exception std::exception thrown if encounters an error .
+     *   @brief Callback function executed when executing a select query.
      **/
     static int callback(void *data, int argc, char **argv, char **azColName);
 };

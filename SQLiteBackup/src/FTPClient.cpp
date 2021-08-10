@@ -88,8 +88,8 @@ int winSocket::send(const char* sendbuf) {
 }
 
 std::string winSocket::receive() {
-    // Receive until the peer closes the connection
     std::memset(recvbuf, 0x00, sizeof(recvbuf));
+    // Receive the data
     int iResult = recv(ConnectSocket, recvbuf, recvbuflen, 0);
     if (iResult > 0) {
         printf("Bytes received: %d\n", iResult);
