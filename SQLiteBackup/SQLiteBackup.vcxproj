@@ -145,12 +145,14 @@
     <ClCompile Include="src\SQLite.cpp" />
     <ClCompile Include="src\sqlite\shell.c" />
     <ClCompile Include="src\sqlite\sqlite3.c" />
+    <ClCompile Include="src\WinSocket.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\FTPClient.h" />
     <ClInclude Include="src\SQLite.h" />
     <ClInclude Include="src\sqlite\sqlite3.h" />
     <ClInclude Include="src\sqlite\sqlite3ext.h" />
+    <ClInclude Include="src\WinSocket.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -8,56 +8,38 @@
 #include <Windows.h>
 #include "sqlite/sqlite3.h"
  
-/**
- *   @brief Custom exception class
+/**   @brief Custom exception class
  */
 class SQLiteException: public std::exception
 {
 public:
-    /**
-   *   @brief Construct a SQLiteException with a message.
-   *   @param message explanatory message
-   */
-    SQLiteException(const std::string &message) throw();
- 
-    /** @brief Destructor.
-     */
-    virtual ~SQLiteException() throw ();
- 
-    /** @brief Returns a pointer to the (constant) error description.
-     */
-    virtual const char* what() const throw (){  return errmsg.c_str(); }
- 
+    SQLiteException(const std::string& message) throw() { errmsg = message; };
+    virtual ~SQLiteException() throw () {};
+    virtual const char* what() const throw () { return errmsg.c_str(); } 
 protected:
-    /** @brief Error message.
-     */
     std::string errmsg;
 };
  
-/**
- *    @brief structure for representing a query result
+/**   @brief structure for representing a query result
  */
-typedef struct queryResult {
-    std::vector<std::string> columnNames;
+typedef struct Query_result {
+    std::vector<std::string> column_names;
     std::vector<std::vector<std::string>> result;
-    bool isColumnNamesSet = false;
-    
-    size_t	getColumnCount() { return columnNames.size(); };
-    size_t	getRowCount() { return result.size(); };
+    bool colomn_names_exist = false;    
+    size_t get_column_count() { return column_names.size(); };
+    size_t get_row_count() { return result.size(); };
+} Query_result;
 
-} queryResult;
-
-/**
- *    @brief Struct for Sync database for Multithreading
+/**   @brief Struct for database synchronization during multithreading
  */
-typedef struct sync
+typedef struct Sync_db
 {
     CRITICAL_SECTION _cs;
-    sync() { ::InitializeCriticalSection(&_cs); }
-    void lockDB() { ::EnterCriticalSection(&_cs); }
-    void unlockDB() { ::LeaveCriticalSection(&_cs); }
-    ~sync() { ::DeleteCriticalSection(&_cs); }
-}syncDB;
+    Sync_db() { ::InitializeCriticalSection(&_cs); }
+    void lock_db() { ::EnterCriticalSection(&_cs); }
+    void unlock_db() { ::LeaveCriticalSection(&_cs); }
+    ~Sync_db() { ::DeleteCriticalSection(&_cs); }
+} Sync_db;
  
 /**
  *    @brief class for handling database connection and executing sql query
@@ -65,98 +47,97 @@ typedef struct sync
 class SQLite
 {
 private:
-    /** @brief SQLITE  database connection object
+    /**  @brief SQLITE database connection object
     */
-    sqlite3* m_pDb;
+    sqlite3* p_db;
 
-    /**
-     *   @brief Sync Database in Case of Multiple Threads using class object
+    /**  @brief Database synchronization during multithreading
      **/
-    syncDB* sync;
- 
-    /** Database result set
-    */
-    static queryResult m_queryResult;
+    Sync_db* sync;
+
 public:
-    /**
-     *   @brief Creates a database connection
+    /**  Database result set
+    */
+    static Query_result m_query_result;
+
+    /**  @brief Creates a database connection
      **/
     SQLite();
 
-    /**
-     *   @brief Creates database  connection to the specified database.
-     *   @param sDbName database name.
+    /**  @brief Creates database connection to the specified database.
+     *   @param db_name database name.
      *   @exception SQLiteException thrown if unable to connect to the database.
      **/
-    SQLite(const std::string& sDbName);
+    SQLite(const std::string& db_name);
  
-    /**
-     *   Destructor
+    /**  Destructor
      **/
     virtual ~SQLite();
  
-    /**
-     *   @brief To make connection to a database.
-     *   @param sDbName database name.
+    /**  @brief To make connection to a database.
+     *   @param db_name database name.
      *   @exception SQLiteException thrown if unable to connect to the database.
      **/
-    void connect(const std::string& sDbName);
+    void connect(const std::string& db_name);
 
-    /**
-     *   @brief Closes databse connection..
+    /**  @brief Closes databse connection..
      *   @exception SQLiteException thrown if unable to close the connection.
      **/
     void close();
 
-    /**
-     *   @brief Executes SQL commands provided by sQuery argument
+    /**  @brief Executes SQL commands provided by sql_query argument
      *          Can consist of more than one SQL command.
-     *   @param sQuery sql query
+     *   @param sql_query sql query
      *   @exception SQLiteException thrown if encounters an error while executing the query.
      **/
-    int execute(const std::string& sQuery);
+    int execute(const std::string& sql_query);
 
-    /**
-     *   @brief Prints the qurey result
+    /**  @brief Prints the qurey result
      **/
-    void printQueryResult();
-
-    /**
-     *   @brief To dump the database into SQL file
-     *   @param sqlFileNam file name
-     **/
-    void dump(const std::string& sqlFileNam);
+    void display_query_result();
  
-     /**
-     *   @brief To get the result set.
+     /** @brief To get the result set.
      **/
-    queryResult* getQueryResult();
+    Query_result* get_query_result();
  
-    /**
-     *   @brief Begins an atomic transaction
+    /**  @brief Begin an atomic transaction
      **/ 
-    void beginTransaction();
+    void begin_transaction();
 
-    /**
-     *   @brief Commit all atomic transaction
+    /**  @brief Commit all atomic transactions
      **/
-    void commitTransaction();
+    void commit_transaction();
 
-    /**
-     *   @brief To revert all atomic transaction
+    /**  @brief Revert all atomic transactions
      **/
-    void rollBack();
+    void rollback();
  
 private:
-    /**
-     *   @brief To clear result array.
+    /**  @brief To clear result array.
      **/
-    void clearRecords();
+    void clear_records();
 
-    /**
-     *   @brief Callback function executed when executing a select query.
+    /**  @brief Callback function executed when executing a select query.
      **/
     static int callback(void *data, int argc, char **argv, char **azColName);
+};
+
+/**
+ *    @brief helper class for exporting database
+ */
+class DatabaseExporter
+{
+public:
+    explicit DatabaseExporter(SQLite& db)
+        : m_db(db) {}
+
+    /**  @brief To dump the database into SQL file
+     *   @param sql_file_name file name
+     **/
+    void dump(const std::string& sql_file_name);
+
+private:
+    SQLite& m_db;
 };
 
 #endif 

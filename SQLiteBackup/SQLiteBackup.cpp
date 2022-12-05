@@ -1,7 +1,6 @@
 #include <iostream>
 #include "src/SQLite.h"
 #include "src/FTPClient.h"
-#include <regex>
 
 
 int main()
@@ -9,7 +8,7 @@ int main()
     SQLite* db = new SQLite("example.db");
     int total_changes = 0;
 
-    db->beginTransaction();
+    db->begin_transaction();
 
     db->execute("DROP TABLE IF EXISTS PERSON;");
     std::string sql =
@@ -35,7 +34,7 @@ int main()
     std::cout << "total changes: " << total_changes << std::endl;
 
     db->execute("SELECT * FROM PERSON WHERE AGE < 30;");
-    db->printQueryResult();
+    db->display_query_result();
 
     db->execute("DROP TABLE IF EXISTS coffees;");
     sql =
@@ -58,11 +57,13 @@ int main()
     total_changes = db->execute(sql);
     std::cout << "total changes: " << total_changes << std::endl;
 
-    db->commitTransaction();
+    db->commit_transaction();
 
-    std::string sqlDumpFile = "export.sql";
-    db->dump(sqlDumpFile);
+    std::string sql_dump_file = "export.sql";
+    DatabaseExporter exporter(*db);
+    exporter.dump(sql_dump_file);
 
+    delete db;
     std::cout << std::endl;
 
     std::string ip = "127.0.0.1";
@@ -70,37 +71,43 @@ int main()
     std::string user = "admin";
     std::string passwd = "admin";
     std::string dir = "sql";
-    FTPClient* ftp = new FTPClient(ip, port, user, passwd);
 
-    // see FTP commands https://en.wikipedia.org/wiki/List_of_FTP_commands
-    ftp->executeCommand("PWD");
+    try {
+        FTP_client* ftp = new FTP_client(ip, port, user, passwd);
 
-    // Command that requires data channel
-    ftp->requestNewDataChannel();
-    ftp->executeCommand("LIST");
-    std::string lsResponse = ftp->readData(); // read from data channel
+        // see FTP commands https://en.wikipedia.org/wiki/List_of_FTP_commands
+        ftp->execute_command("PWD");
 
-    // assumming that the user have all permissions on the ftp directory
-    // make directory in the FTP server
-    std::string mkdir = "MKD " + dir;
-    ftp->executeCommand(mkdir);
+        // Command that requires data channel
+        ftp->request_new_data_channel();
+        ftp->execute_command("LIST");
+        std::string ls_response = ftp->read_data(); // read from data channel
 
-    // Command that requires data channel
-    ftp->requestNewDataChannel();
-    ftp->executeCommand("LIST");
-    ftp->readData(); // read from data channel
+        // assumming that the user have all permissions on the ftp directory
+        // make directory in the FTP server
+        std::string mkdir = "MKD " + dir;
+        ftp->execute_command(mkdir);
 
-    // Backup the database file into FTP server
-    std::ifstream fs(sqlDumpFile);
-    std::string sqlDumpBuf((std::istreambuf_iterator<char>(fs)), std::istreambuf_iterator<char>());
-    std::string sendFileCMD = "STOR " + dir + "/" + sqlDumpFile;
-    ftp->requestNewDataChannel();
-    ftp->executeCommand(sendFileCMD);
-    ftp->sendData(sqlDumpBuf);
+        // Command that requires data channel
+        ftp->request_new_data_channel();
+        ftp->execute_command("LIST");
+        ftp->read_data(); // read from data channel
 
-    delete db;
-    delete ftp;
+        // Backup the database file into FTP server
+        std::ifstream fs(sql_dump_file);
+        std::string sql_dump_buf((std::istreambuf_iterator<char>(fs)), std::istreambuf_iterator<char>());
+        std::string send_file_cmd = "STOR " + dir + "/" + sql_dump_file;
+        ftp->request_new_data_channel();
+        ftp->execute_command(send_file_cmd);
+        ftp->send_data(sql_dump_buf);
 
+        delete ftp;
+    }
+    catch (const std::runtime_error& error) {
+        std::cout << "Error: communication via FTP failed: " << error.what() << std::endl;
+    }
+
+    std::cout << "Execution finished succesfully." << std::endl;
     std::cin.get();
     return 0;
 }

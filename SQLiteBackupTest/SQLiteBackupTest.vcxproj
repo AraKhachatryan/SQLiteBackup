@@ -40,6 +40,7 @@
     <ClCompile Include="..\SQLiteBackup\src\SQLite.cpp" />
     <ClCompile Include="..\SQLiteBackup\src\sqlite\shell.c" />
     <ClCompile Include="..\SQLiteBackup\src\sqlite\sqlite3.c" />
+    <ClCompile Include="..\SQLiteBackup\src\WinSocket.cpp" />
     <ClCompile Include="SQLiteBackupTest.cpp" />
     <ClCompile Include="TestFTPClient.cpp" />
     <ClCompile Include="TestSQLite.cpp" />
@@ -49,6 +50,7 @@
     <ClInclude Include="..\SQLiteBackup\src\SQLite.h" />
     <ClInclude Include="..\SQLiteBackup\src\sqlite\sqlite3.h" />
     <ClInclude Include="..\SQLiteBackup\src\sqlite\sqlite3ext.h" />
+    <ClInclude Include="..\SQLiteBackup\src\WinSocket.h" />
     <ClInclude Include="TestFTPClient.h" />
     <ClInclude Include="TestSQLite.h" />
   </ItemGroup>

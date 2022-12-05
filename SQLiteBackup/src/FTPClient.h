@@ -1,74 +1,12 @@
 #ifndef  FTPCLIENT_H
 #define  FTPCLIENT_H
 
-#define WIN32_LEAN_AND_MEAN
-
-//#include <WinSock2.h>
-#include <windows.h>
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#include <stdlib.h>
-#include <stdio.h>
-
-#include <iostream>
-#include <fstream>
-
-// Need to link with Ws2_32.lib, Mswsock.lib, and Advapi32.lib
-#pragma comment (lib, "Ws2_32.lib")
-#pragma comment (lib, "Mswsock.lib")
-#pragma comment (lib, "AdvApi32.lib")
-
-#define DEFAULT_BUFLEN 1024
+#include "WinSocket.h"
 
 /**
- *   @brief class for data transfer through windows sockets.
- *		    Represents the client side part.
+ *   @brief class for FTP data transfer inherited from Win_socket class.
  **/
-class winSocket
-{
-private:
-	SOCKET ConnectSocket;
-
-public:
-	/**
-	 *   @brief constructs an windows socket object.
-     *   @param ip - ip address.
-     *   @param port - port to connect.
-	 **/
-	winSocket(const std::string& ip, std::string& port);
-
-	/**
-	 *   @brief deoult constructor not available
-	 **/
-	winSocket() = delete;
-
-	/**
-	 *   @brief destructor
-	 **/
-	virtual ~winSocket();
-
-	/**
-	 *   @brief sends the data to the server
-	 *   @param sendbuf - data buffer to be sent
-	 *   @return returns sent bytes count
-	 **/
-	int send(const char* sendbuf);
-
-	/**
-	 *   @brief reads the data from server and returns as a string
-	 **/
-	std::string receive();
-
-private:
-	char recvbuf[DEFAULT_BUFLEN];
-	int recvbuflen = DEFAULT_BUFLEN;
-};
-
-
-/**
- *   @brief class for FTP data transfer inherited from winSocket class.
- **/
-class FTPClient: private winSocket
+class FTP_client: private Win_socket
 {
 private:
 	const std::string user;
@@ -76,57 +14,53 @@ private:
 	const std::string ip;
 	const std::string port;
 
-	/**
-	 *   @brief For data channel connection to the FTP server.
+	/**  @brief For data channel connection to the FTP server.
 	 *          Commands like "LIST" (list directory) and "STOR <filename>" (store the data as a file)
-	 *	        requiring data connection to the FTP server on different port
+	 *          requiring data connection to the FTP server on different port
 	 **/
-	winSocket* dataChannel;
+	Win_socket* data_channel;
 
 public:
-	/**
-	 *   @brief Constructs the winSocket base class object through list initialization 
-	 *				- used as command channel for FTP server.
-	 *	 	    Constructs the FTPClient object.
+	/**  @brief Constructs the Win_socket base class object through list initialization.
+	 *          Constructs the FTP_client object.
 	 **/
-	FTPClient(const std::string& ip, std::string& port, const std::string& user, const std::string& passwd)
-		: winSocket(ip, port), user(user), passwd(passwd), ip(ip), port(port) {
-		dataChannel = nullptr;
-		login();
+	FTP_client(const std::string& ip, std::string& port, const std::string& user, const std::string& passwd)
+			try : Win_socket(ip, port), user(user), passwd(passwd), ip(ip), port(port) {
+		data_channel = nullptr;
+		this->login();
+	}
+	catch(const std::runtime_error& error) {
+		std::cout << "Error: Socket initialization failed: " << error.what() << std::endl;
+		throw;
 	}
 
-	FTPClient() = delete;
-	virtual ~FTPClient();
+	FTP_client() = delete;
+	virtual ~FTP_client();
 
-	/**
-	 *   @brief executes the command through command channel on the FTP server
+	/**  @brief executes the command through command channel on the FTP server
 	 *   @return returns the status/result of the command
 	 **/
-	std::string executeCommand(const std::string& cmd);
+	std::string execute_command(const std::string& cmd);
 
-	/**
-	 *   @brief requests new data channel connection to the FTP server.
-	 *			Algorithm:
-	 *				1. executes "PASV" command - entering passive mode
-	 *				2. reads the response and calculates the port number to connect
-	 *				3. destroys the old dataChannel connection
-	 *				4. creates new dataChannel connection with newly calculated port number
+	/**  @brief requests new data channel connection to the FTP server.
+	 *          Algorithm:
+	 *              1. executes "PASV" command - entering passive mode
+	 *              2. reads the response and calculates the port number to connect
+	 *              3. destroys the old data_channel connection
+	 *              4. creates new data_channel connection with newly calculated port number
 	 **/
-	void requestNewDataChannel();
+	void request_new_data_channel();
 
-	/**
-	 *   @brief reads the data from data channel as a string
+	/**  @brief reads the data from data channel as a string
 	 **/
-	std::string readData();
+	std::string read_data();
 
-	/**
-	 *   @brief sends the data trough data channel
+	/**  @brief sends the data trough data channel
 	 **/
-	void sendData(const std::string& data);
+	void send_data(const std::string& data);
 
 private:
-	/**
-	 *   @brief performs login to the FTP server
+	/**  @brief performs login to the FTP server
 	 **/
 	void login();
 };

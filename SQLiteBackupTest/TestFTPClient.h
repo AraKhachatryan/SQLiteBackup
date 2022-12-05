@@ -6,36 +6,30 @@
 
 namespace GT
 {
-	class TestFTPClient : public ::testing::Test
+	class Test_FTP_client : public ::testing::Test
 	{
 	public:
-		/**
-		 *   @brief through constructor can be done set-up work for each test.
+		/**  @brief through constructor can be done set-up work for each test.
 		 **/
-		TestFTPClient(void);
+		Test_FTP_client(void);
 
-		/**
-		 *   @brief through destructor can be done clean-up work for each test.
+		/**  @brief through destructor can be done clean-up work for each test.
 		 **/
-		virtual ~TestFTPClient(void) override;
+		virtual ~Test_FTP_client(void) override;
 
-		/**
-		 *   @brief SetUpTestCase() will be called before running the first test in test suite.
+		/**  @brief SetUpTestCase() will be called before running the first test in test suite.
 		 **/
 		static void SetUpTestCase();
 
-		/**
-		 *   @brief TearDownTestCase() will be called after running the last test in test suite.
+		/**  @brief TearDownTestCase() will be called after running the last test in test suite.
 		 **/
 		static void TearDownTestCase();
 
-		/**
-		 *   @brief SetUp() will be called immediately after the constructor (right before each test).
+		/**  @brief SetUp() will be called immediately after the constructor (right before each test).
 		 **/
 		virtual void SetUp(void) override;
 
-		/**
-		 *   @brief TearDown() will be called immediately after each test (right before the destructor).
+		/**  @brief TearDown() will be called immediately after each test (right before the destructor).
 		 **/
 		virtual void TearDown(void) override;
 
@@ -43,10 +37,9 @@ namespace GT
 		static int mArgc;
 		static char** mArgs;
 
-		/**
-		 *   @brief FTPClient member to be tested in the test suite.
+		/**  @brief FTPClient member to be tested in the test suite.
 		 **/
-		static FTPClient* pFTP;
+		static FTP_client* p_ftp;
 	};
 }
 

@@ -12,10 +12,12 @@ The SQLiteBackup project
 |   |-- SQLiteBackup.vcxproj.filters  - 
 |   |-- SQLiteBackup.vcxproj.user     -
 |   `-- src                           - source files directory
-|       |-- FTPClient.cpp             - implemetation of the FTPClient and winSocket classes
-|       |-- FTPClient.h               - defination of the FTPClient and winSocket classes
+|       |-- FTPClient.cpp             - implemetation of the FTP_client class
+|       |-- FTPClient.h               - defination of the FTP_client class
 |       |-- SQLite.cpp                - implemetation of the SQLite class
 |       |-- SQLite.h                  - defination of the SQLite class
+|       |-- WinSocket.cpp             - implemetation of the Win_socket class
+|       |-- WinSocket.h               - defination of the Win_socket class
 |       `-- sqlite                    - the sqlite3 API, downloaded from https://www.sqlite.org/2021/sqlite-amalgamation-3360000.zip
 |           |-- shell.c               -
 |           |-- sqlite3.c             -
